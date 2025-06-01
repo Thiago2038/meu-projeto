@@ -1,144 +1,119 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bar Completo - Pedido e Resumo</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
-  h1 { color: #27ae60; }
-  .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-  .tab {
-    padding: 10px 18px;
-    background: #ddd;
-    border-radius: 8px 8px 0 0;
-    cursor: pointer;
-    user-select: none;
-  }
-  .tab.active {
-    background: #27ae60;
-    color: white;
-    font-weight: bold;
-  }
-  .tab-content {
-    background: white;
-    padding: 20px;
-    border-radius: 0 8px 8px 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  .produtos { display: flex; flex-wrap: wrap; gap: 15px; }
-  .produto { width: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 12px; background: #fafafa; }
-  .produto h3 { color: #2980b9; margin-bottom: 6px; }
-  .produto p { font-size: 14px; color: #555; margin-bottom: 8px; }
-  .produto strong { font-size: 16px; }
-  button { background-color: #27ae60; border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-  button:hover { background-color: #1f7a42; }
-  ul { list-style: none; padding-left: 0; }
-  ul li { padding: 6px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-  .total { font-weight: bold; font-size: 18px; margin-top: 10px; }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RENATA EU TE AMO MUITO MEU CORAÇÂO</title>
+    <style>
+        /* Estilos básicos */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000; /* fundo preto para destaque das bolhas */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Centralizar o nome */
+        #nome {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: white;
+            text-shadow: 2px 2px 4px #000;
+            z-index: 1;
+        }
+
+        /* Canvas em fundo */
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0; /* atrás do nome */
+        }
+    </style>
 </head>
 <body>
+    <div id="nome">RENATA EU TE AMO MUITO MEU CORAÇÂO</div>
+    <canvas id="bolhas"></canvas>
+    <script>
+        const canvas = document.getElementById('bolhas');
+        const ctx = canvas.getContext('2d');
 
-<h1>Bar Completo</h1>
+        let width = window.innerWidth;
+        let height = window.innerHeight;
 
-<div class="tabs">
-  <div class="tab active" data-tab="pedido" onclick="abrirAba('pedido')">Fazer Pedido</div>
-  <div class="tab" data-tab="resumo" onclick="abrirAba('resumo')">Resumo do Pedido</div>
-</div>
+        // Ajusta tamanho do canvas
+        function ajustarTamanho() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
 
-<div id="pedido" class="tab-content">
-  <div class="produtos" id="produtos"></div>
-  <p><button onclick="finalizarPedido()">Finalizar Pedido</button></p>
-</div>
+        window.addEventListener('resize', ajustarTamanho);
+        ajustarTamanho();
 
-<div id="resumo" class="tab-content" style="display:none;">
-  <h2>Resumo do Pedido</h2>
-  <ul id="listaResumo"></ul>
-  <p class="total">Total: R$ <span id="totalResumo">0.00</span></p>
-  <p><button onclick="voltarPedido()">Voltar para Pedido</button></p>
-</div>
+        // Criar bolhas
+        const quantidade = 40;
+        const bolhas = [];
 
-<script>
-  const produtos = [
-    { nome: "Coxinha", descricao: "Frango cremoso e crocante", preco: 7.00 },
-    { nome: "Kibe", descricao: "Carne temperada e frita", preco: 6.50 },
-    { nome: "Esfiha", descricao: "Carne com temperos especiais", preco: 5.50 },
-    { nome: "Cerveja Long Neck", descricao: "600ml gelada", preco: 9.00 },
-    { nome: "Cerveja Pilsen", descricao: "500ml puro malte", preco: 8.00 },
-    { nome: "Cerveja IPA", descricao: "600ml com amargor marcante", preco: 11.50 },
-    { nome: "Caipirinha Tradicional", descricao: "Limão, cachaça e açúcar", preco: 12.00 },
-    { nome: "Caipirinha Morango", descricao: "Morango, limão e cachaça", preco: 14.00 },
-    { nome: "Caipirinha Kiwi", descricao: "Kiwi fresco e cachaça", preco: 15.00 }
-  ];
+        for (let i=0; i<quantidade; i++) {
+            bolhas.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: 10 + Math.random() * 20,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                cor: `rgba(255, 255, 255, ${0.4 + Math.random() * 0.6})`
+            });
+        }
 
-  let pedido = [];
+        // Desenhar bolhas
+        function desenhar() {
+            ctx.clearRect(0, 0, width, height);
+            bolhas.forEach(b => {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fillStyle = b.cor;
+                ctx.fill();
+            });
+        }
 
-  const produtosDiv = document.getElementById("produtos");
-  const listaResumo = document.getElementById("listaResumo");
-  const totalResumoSpan = document.getElementById("totalResumo");
+        // Atualizar movimento das bolhas
+        function atualizar() {
+            bolhas.forEach(b => {
+                b.x += b.vx;
+                b.y += b.vy;
 
-  function mostrarProdutos() {
-    produtos.forEach((produto, i) => {
-      const div = document.createElement("div");
-      div.classList.add("produto");
-      div.innerHTML = `
-        <h3>${produto.nome}</h3>
-        <p>${produto.descricao}</p>
-        <strong>R$ ${produto.preco.toFixed(2)}</strong>
-        <br/>
-        <button onclick="adicionarAoPedido(${i})">Adicionar</button>
-      `;
-      produtosDiv.appendChild(div);
-    });
-  }
+                // Rebater nas paredes
+                if (b.x + b.r > width || b.x - b.r < 0) b.vx *= -1;
+                if (b.y + b.r > height || b.y - b.r < 0) b.vy *= -1;
+            });
+        }
 
-  function adicionarAoPedido(idx) {
-    pedido.push(produtos[idx]);
-    alert(`${produtos[idx].nome} adicionado ao pedido!`);
-  }
+        // Loop de animação
+        function loop() {
+            atualizar();
+            desenhar();
+            requestAnimationFrame(loop);
+        }
 
-  function finalizarPedido() {
-    if(pedido.length === 0){
-      alert("Você não adicionou nenhum produto.");
-      return;
-    }
-    montarResumo();
-    abrirAba('resumo');
-  }
+        loop();
 
-  function montarResumo() {
-    listaResumo.innerHTML = "";
-    const contagem = {};
-    pedido.forEach(item => {
-      contagem[item.nome] = (contagem[item.nome] || 0) + 1;
-    });
-    for(const [nome, qtd] of Object.entries(contagem)){
-      const li = document.createElement("li");
-      li.textContent = `${qtd}x ${nome}`;
-      listaResumo.appendChild(li);
-    }
-    const total = pedido.reduce((acc, i) => acc + i.preco, 0);
-    totalResumoSpan.textContent = total.toFixed(2);
-  }
-
-  function abrirAba(nome) {
-    // Oculta todas as abas
-    document.querySelectorAll('.tab-content').forEach(div => div.style.display = 'none');
-    // Remove active de todas as tabs
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    // Mostra a aba clicada
-    document.getElementById(nome).style.display = 'block';
-    // Marca a tab ativa
-    document.querySelector(`.tab[data-tab="${nome}"]`).classList.add('active');
-  }
-
-  function voltarPedido(){
-    abrirAba('pedido');
-  }
-
-  mostrarProdutos();
-</script>
-
+        // Opcional: tocar som ao clicar na bolha
+        canvas.addEventListener('click', (e) => {
+            bolhas.forEach(b => {
+                const dx = e.clientX - b.x;
+                const dy = e.clientY - b.y;
+                if (Math.sqrt(dx * dx + dy * dy) < b.r) {
+                    const audio = new Audio('https://www.soundjay.com/misc/sounds/coin-1.mp3');
+                    audio.play();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

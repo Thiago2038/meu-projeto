@@ -1,0 +1,19 @@
+body {
+    background: white;
+    text-align: center;
+    padding: 100px;
+}
+
+h1 {
+    opacity: 0;
+    transform: translateX(-100px);
+    animation: slideIn 1s ease forwards;
+} 
+
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
