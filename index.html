@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bar Completo - Pedido e Resumo</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
+  h1 { color: #27ae60; }
+  .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+  .tab {
+    padding: 10px 18px;
+    background: #ddd;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .tab.active {
+    background: #27ae60;
+    color: white;
+    font-weight: bold;
+  }
+  .tab-content {
+    background: white;
+    padding: 20px;
+    border-radius: 0 8px 8px 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .produtos { display: flex; flex-wrap: wrap; gap: 15px; }
+  .produto { width: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 12px; background: #fafafa; }
+  .produto h3 { color: #2980b9; margin-bottom: 6px; }
+  .produto p { font-size: 14px; color: #555; margin-bottom: 8px; }
+  .produto strong { font-size: 16px; }
+  button { background-color: #27ae60; border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+  button:hover { background-color: #1f7a42; }
+  ul { list-style: none; padding-left: 0; }
+  ul li { padding: 6px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+  .total { font-weight: bold; font-size: 18px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Bar Completo</h1>
+
+<div class="tabs">
+  <div class="tab active" data-tab="pedido" onclick="abrirAba('pedido')">Fazer Pedido</div>
+  <div class="tab" data-tab="resumo" onclick="abrirAba('resumo')">Resumo do Pedido</div>
+</div>
+
+<div id="pedido" class="tab-content">
+  <div class="produtos" id="produtos"></div>
+  <p><button onclick="finalizarPedido()">Finalizar Pedido</button></p>
+</div>
+
+<div id="resumo" class="tab-content" style="display:none;">
+  <h2>Resumo do Pedido</h2>
+  <ul id="listaResumo"></ul>
+  <p class="total">Total: R$ <span id="totalResumo">0.00</span></p>
+  <p><button onclick="voltarPedido()">Voltar para Pedido</button></p>
+</div>
+
+<script>
+  const produtos = [
+    { nome: "Coxinha", descricao: "Frango cremoso e crocante", preco: 7.00 },
+    { nome: "Kibe", descricao: "Carne temperada e frita", preco: 6.50 },
+    { nome: "Esfiha", descricao: "Carne com temperos especiais", preco: 5.50 },
+    { nome: "Cerveja Long Neck", descricao: "600ml gelada", preco: 9.00 },
+    { nome: "Cerveja Pilsen", descricao: "500ml puro malte", preco: 8.00 },
+    { nome: "Cerveja IPA", descricao: "600ml com amargor marcante", preco: 11.50 },
+    { nome: "Caipirinha Tradicional", descricao: "Limão, cachaça e açúcar", preco: 12.00 },
+    { nome: "Caipirinha Morango", descricao: "Morango, limão e cachaça", preco: 14.00 },
+    { nome: "Caipirinha Kiwi", descricao: "Kiwi fresco e cachaça", preco: 15.00 }
+  ];
+
+  let pedido = [];
+
+  const produtosDiv = document.getElementById("produtos");
+  const listaResumo = document.getElementById("listaResumo");
+  const totalResumoSpan = document.getElementById("totalResumo");
+
+  function mostrarProdutos() {
+    produtos.forEach((produto, i) => {
+      const div = document.createElement("div");
+      div.classList.add("produto");
+      div.innerHTML = `
+        <h3>${produto.nome}</h3>
+        <p>${produto.descricao}</p>
+        <strong>R$ ${produto.preco.toFixed(2)}</strong>
+        <br/>
+        <button onclick="adicionarAoPedido(${i})">Adicionar</button>
+      `;
+      produtosDiv.appendChild(div);
+    });
+  }
+
+  function adicionarAoPedido(idx) {
+    pedido.push(produtos[idx]);
+    alert(`${produtos[idx].nome} adicionado ao pedido!`);
+  }
+
+  function finalizarPedido() {
+    if(pedido.length === 0){
+      alert("Você não adicionou nenhum produto.");
+      return;
+    }
+    montarResumo();
+    abrirAba('resumo');
+  }
+
+  function montarResumo() {
+    listaResumo.innerHTML = "";
+    const contagem = {};
+    pedido.forEach(item => {
+      contagem[item.nome] = (contagem[item.nome] || 0) + 1;
+    });
+    for(const [nome, qtd] of Object.entries(contagem)){
+      const li = document.createElement("li");
+      li.textContent = `${qtd}x ${nome}`;
+      listaResumo.appendChild(li);
+    }
+    const total = pedido.reduce((acc, i) => acc + i.preco, 0);
+    totalResumoSpan.textContent = total.toFixed(2);
+  }
+
+  function abrirAba(nome) {
+    // Oculta todas as abas
+    document.querySelectorAll('.tab-content').forEach(div => div.style.display = 'none');
+    // Remove active de todas as tabs
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    // Mostra a aba clicada
+    document.getElementById(nome).style.display = 'block';
+    // Marca a tab ativa
+    document.querySelector(`.tab[data-tab="${nome}"]`).classList.add('active');
+  }
+
+  function voltarPedido(){
+    abrirAba('pedido');
+  }
+
+  mostrarProdutos();
+</script>
+
+</body>
+</html>
